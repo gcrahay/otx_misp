@@ -24,16 +24,11 @@ from dateutil import parser as date_parser
 
 from otx_misp.configuration import Configuration
 from otx_misp import get_pulses, create_events
+from .otx import InvalidAPIKey, BadRequest
 
 log = logging.getLogger('oxt_misp')
 console_handler = logging.StreamHandler()
 log.addHandler(console_handler)
-
-try:
-    from OTXv2 import OTXv2, InvalidAPIKey, BadRequest
-except ImportError:
-    log.error('OTXv2 is not installed. Aborting.')
-    sys.exit(10)
 
 
 def timestamp(argument):

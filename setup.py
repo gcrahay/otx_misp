@@ -24,8 +24,8 @@ def read(*names, **kwargs):
 
 setup(
     name='otx-misp',
-    version='0.1.0',
-    license='BSD',
+    version='0.2.0',
+    license='Apache 2.0',
     description='Imports Alienvault OTX pulses to a MISP instance.',
     long_description='%s\n%s' % (
         re.compile('^.. start-badges.*^.. end-badges', re.M | re.S).sub('', read('README.rst')),
@@ -60,10 +60,8 @@ setup(
     ],
     install_requires=[
         'pymisp',
-        'OTXv2',
         'python-dateutil'
     ],
-    dependency_links=['https://github.com/AlienVault-Labs/OTX-Python-SDK.git@1.1.0#egg=OTXv2', ],
     extras_require={
 
     },
