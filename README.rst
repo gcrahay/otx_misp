@@ -32,7 +32,7 @@ Overview
 
 Imports Alienvault OTX pulses to a MISP instance.
 
-* Free software: BSD license
+* Free software: Apache 2.0 license
 
 Installation
 ============
@@ -44,7 +44,7 @@ Installation
 Documentation
 =============
 
-https://otx_misp.readthedocs.io/
+https://otx-misp.readthedocs.io/
 
 Alienvault OTX SDK
 ==================
