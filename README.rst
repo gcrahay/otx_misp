@@ -12,8 +12,8 @@ Overview
     * - package
       - |version| |downloads| |wheel|
 
-.. |docs| image:: https://readthedocs.org/projects/otx_misp/badge/?style=flat
-    :target: https://readthedocs.org/projects/otx_misp
+.. |docs| image:: https://readthedocs.org/projects/otx-misp/badge/?style=flat
+    :target: https://readthedocs.org/projects/otx-misp
     :alt: Documentation Status
 
 .. |version| image:: https://img.shields.io/pypi/v/otx-misp.svg?style=flat
