@@ -79,15 +79,15 @@ parser.add_argument("-v", "--verbose", dest="verbose",
 parser.add_argument('--distribution',
                     help="MISP distribution of events ({}), default: {}".format(','.join(misp_distributions),
                                                                                 misp_distributions[0]),
-                    type=get_misp_type(misp_distributions), default=0)
+                    type=get_misp_type(misp_distributions), default=None)
 parser.add_argument('--threat-level',
                     help="MISP threat level of events ({}), default: {}".format(','.join(misp_threat_levels),
                                                                                 misp_threat_levels[3]),
-                    type=get_misp_type(misp_threat_levels, bias=1), default=4)
+                    type=get_misp_type(misp_threat_levels, bias=1), default=None)
 parser.add_argument('--analysis',
                     help="MISP analysis state of events ({}), default: {}".format(','.join(misp_analysis),
                                                                                   misp_analysis[2]),
-                    type=get_misp_type(misp_analysis), default=2)
+                    type=get_misp_type(misp_analysis), default=None)
 
 
 def main(args=None):

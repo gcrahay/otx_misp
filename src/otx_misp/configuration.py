@@ -20,6 +20,7 @@ class Configuration(object):
     simulation_properties = {'otx': True, 'misp': True, 'server': True, 'timestamp': False,
                              'author': False, 'distribution': False, 'threat_level': False, 'analysis': False,
                              'update_timestamp': False, 'publish': False}
+    defaults = {'distribution': 0, 'threat_level': 4, 'analysis': 2}
     config_section = 'otx_misp'
 
     def __init__(self, arguments):
@@ -61,7 +62,9 @@ class Configuration(object):
         if item not in self.arguments:
             raise AttributeError
         value = getattr(self.arguments, item, None)
-        if item not in self.properties:
+        if value is None and item in self.defaults:
+            value = self.defaults[item]
+        if item not in self.properties or not self.config.has_option(self.config_section, item):
             return value
         if isinstance(value, bool):
             return self.config.getboolean(self.config_section, item)
