@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 import logging
 import time
 from datetime import datetime
-import collections
+import inspect
 
 import pymisp
 import requests
@@ -52,13 +52,13 @@ def get_pulses(otx_api_key, from_timestamp=None):
 
 def get_pulses_iter(otx_api_key, from_timestamp=None):
     """
-    Get the Pulses from Alienvault OTX
+    Get the Pulses from Alienvault OTX and returns a generator
 
     :param otx_api_key: Alienvault OTX API key
     :type otx_api_key: string
     :param from_timestamp: only downlaod Pulses after this Ddate/time (None for all Pulses)
     :type from_timestamp: :class:`datetine.datetine` or ISO string or Unix tinestamp
-    :return: a list of Pulses (dict)
+    :return: a generator of Pulses (dict)
     """
     otx = OTXv2(otx_api_key)
     if from_timestamp is None:
@@ -73,9 +73,9 @@ def get_pulses_iter(otx_api_key, from_timestamp=None):
         raise ValueError("'from_timestamp' must be 'None', a datetime object or an ISO date string")
     return otx.getsince_iter(from_timestamp)
 
-import inspect
+
 def create_events(pulse_or_list, author=False, server=False, key=False, misp=False, distribution=0, threat_level=4,
-                  analysis=2, publish=True):
+                  analysis=2, publish=True, tlp=True):
     """
     Parse a Pulse or a list of Pulses and add it/them to MISP if server and key are present
 
@@ -103,7 +103,8 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
             raise ImportException("Cannot connect ot MISP instance, unknown exception: {}".format(ex.message))
     if isinstance(pulse_or_list, (list, tuple)) or inspect.isgenerator(pulse_or_list):
         return [create_events(pulse, author=author, server=server, key=key, misp=misp, distribution=distribution,
-                              threat_level=threat_level, analysis=analysis, publish=publish) for pulse in pulse_or_list]
+                              threat_level=threat_level, analysis=analysis, publish=publish, tlp=tlp) for pulse in
+                pulse_or_list]
     pulse = pulse_or_list
     if author:
         event_name = pulse['author_name'] + ' | ' + pulse['name']
@@ -115,6 +116,7 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
     result_event = {
         'name': event_name,
         'date': event_date,
+        'tags': list(),
         'attributes': {
             'hashes': {
                 'md5': list(),
@@ -137,6 +139,11 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
     if misp:
         event = misp.new_event(distribution, threat_level, analysis, event_name, date=event_date, published=publish)
         time.sleep(0.2)
+        if tlp and 'TLP' in pulse:
+            tag = "tlp:{}".format(pulse['TLP'])
+            log.info("\t - Adding tag: {}".format(tag))
+            misp.add_tag(event, tag)
+            result_event['tags'].append(tag)
 
     if 'references' in pulse:
         for reference in pulse['references']:

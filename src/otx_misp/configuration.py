@@ -16,10 +16,10 @@ class Configuration(object):
     """ Object holding the configuration """
     properties = {'otx': True, 'misp': True, 'server': True, 'timestamp': False, 'author': False,
                   'distribution': False, 'threat_level': False, 'analysis': False, 'update_timestamp': False,
-                  'publish': False}
+                  'publish': False, 'tlp': False}
     simulation_properties = {'otx': True, 'misp': True, 'server': True, 'timestamp': False,
                              'author': False, 'distribution': False, 'threat_level': False, 'analysis': False,
-                             'update_timestamp': False, 'publish': False}
+                             'update_timestamp': False, 'publish': False, 'tlp': False}
     defaults = {'distribution': 0, 'threat_level': 4, 'analysis': 2}
     config_section = 'otx_misp'
 

@@ -76,6 +76,8 @@ parser.add_argument('-d', '--dry-run', help="Fetch the pulses but don't create M
 parser.add_argument("-v", "--verbose", dest="verbose",
                     action="count", default=0,
                     help="Verbosity, repeat to increase the verbosity level.")
+parser.add_argument('--no-tlp', help='No Traffic Light Protocol tag',
+                    action='store_false', dest='tlp')
 parser.add_argument('--distribution',
                     help="MISP distribution of events ({}), default: {}".format(','.join(misp_distributions),
                                                                                 misp_distributions[0]),
@@ -131,7 +133,8 @@ def main(args=None):
             'key': config.misp,
             'distribution': config.distribution,
             'threat_level': config.threat_level,
-            'analysis': config.analysis
+            'analysis': config.analysis,
+            'tlp': config.tlp
         }
         try:
             import pymisp
