@@ -8,7 +8,7 @@ import pymisp
 import requests
 from .otx import OTXv2
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 # Disable verify SSL warnings
 requests.packages.urllib3.disable_warnings()
