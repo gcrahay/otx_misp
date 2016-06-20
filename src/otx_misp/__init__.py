@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import logging
 import time
 from datetime import datetime
+import collections
 
 import pymisp
 import requests
@@ -15,6 +16,10 @@ requests.packages.urllib3.disable_warnings()
 
 # Get the log handler
 log = logging.getLogger('oxt_misp')
+
+
+class ImportException(Exception):
+    pass
 
 
 def get_pulses(otx_api_key, from_timestamp=None):
@@ -45,6 +50,30 @@ def get_pulses(otx_api_key, from_timestamp=None):
     return pulses
 
 
+def get_pulses_iter(otx_api_key, from_timestamp=None):
+    """
+    Get the Pulses from Alienvault OTX
+
+    :param otx_api_key: Alienvault OTX API key
+    :type otx_api_key: string
+    :param from_timestamp: only downlaod Pulses after this Ddate/time (None for all Pulses)
+    :type from_timestamp: :class:`datetine.datetine` or ISO string or Unix tinestamp
+    :return: a list of Pulses (dict)
+    """
+    otx = OTXv2(otx_api_key)
+    if from_timestamp is None:
+        log.debug("Retrieving all Pulses (no timestamp)")
+        return otx.getall()
+    elif isinstance(from_timestamp, int):
+        dt = datetime.fromtimestamp(from_timestamp)
+        from_timestamp = dt.isoformat()
+    elif isinstance(from_timestamp, datetime):
+        from_timestamp = from_timestamp.isoformat()
+    elif not isinstance(from_timestamp, basestring):
+        raise ValueError("'from_timestamp' must be 'None', a datetime object or an ISO date string")
+    return otx.getsince_iter(from_timestamp)
+
+import inspect
 def create_events(pulse_or_list, author=False, server=False, key=False, misp=False, distribution=0, threat_level=4,
                   analysis=2, publish=True):
     """
@@ -69,12 +98,10 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
         try:
             misp = pymisp.PyMISP(server, key, False, 'json')
         except pymisp.PyMISPError as ex:
-            log.debug("Cannot connect ot MISP instance: {}".format(ex.message))
-            raise Exception
+            raise ImportException("Cannot connect ot MISP instance: {}".format(ex.message))
         except Exception as ex:
-            log.debug("Cannot connect ot MISP instance, unknown exception: {}".format(ex.message))
-            raise
-    if isinstance(pulse_or_list, (list, tuple)):
+            raise ImportException("Cannot connect ot MISP instance, unknown exception: {}".format(ex.message))
+    if isinstance(pulse_or_list, (list, tuple)) or inspect.isgenerator(pulse_or_list):
         return [create_events(pulse, author=author, server=server, key=key, misp=misp, distribution=distribution,
                               threat_level=threat_level, analysis=analysis, publish=publish) for pulse in pulse_or_list]
     pulse = pulse_or_list
@@ -117,7 +144,6 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
             if misp:
                 misp.add_named_attribute(event, 'External analysis', 'link', reference)
             result_event['attributes']['references'].append(reference)
-            time.sleep(0.2)
 
     for ind in pulse['indicators']:
         ind_type = ind['type']
@@ -198,8 +224,6 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
         else:
             log.warning("Unsupported indicator type: %s" % ind_type)
 
-        if misp:
-            time.sleep(0.2)
     if misp and publish:
         event['Event']['published'] = False
         misp.publish(event)

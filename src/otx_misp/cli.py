@@ -23,7 +23,7 @@ from datetime import datetime
 from dateutil import parser as date_parser
 
 from otx_misp.configuration import Configuration, ConfigurationError
-from otx_misp import get_pulses, create_events
+from otx_misp import get_pulses_iter as get_pulses, create_events
 from .otx import InvalidAPIKey, BadRequest
 
 log = logging.getLogger('oxt_misp')
@@ -138,7 +138,11 @@ def main(args=None):
         except ImportError:
             log.error('PyMISP is not installed. Aborting.')
             sys.exit(20)
-    create_events(pulses, author=config.author, **kwargs)
+    try:
+        create_events(pulses, author=config.author, **kwargs)
+    except Exception as ex:
+        log.error(ex.message)
+        sys.exit(21)
 
     if config.write_config or config.update_timestamp:
         if args.config:
