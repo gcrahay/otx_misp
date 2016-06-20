@@ -76,7 +76,7 @@ def get_pulses_iter(otx_api_key, from_timestamp=None):
 
 
 def create_events(pulse_or_list, author=False, server=False, key=False, misp=False, distribution=0, threat_level=4,
-                  analysis=2, publish=True, tlp=True, discover_tags=False):
+                  analysis=2, publish=True, tlp=True, discover_tags=False, to_ids=False):
     """
     Parse a Pulse or a list of Pulses and add it/them to MISP if server and key are present
 
@@ -125,8 +125,8 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
 
     if isinstance(pulse_or_list, (list, tuple)) or inspect.isgenerator(pulse_or_list):
         return [create_events(pulse, author=author, server=server, key=key, misp=misp, distribution=distribution,
-                              threat_level=threat_level, analysis=analysis, publish=publish, tlp=tlp) for pulse in
-                pulse_or_list]
+                              threat_level=threat_level, analysis=analysis, publish=publish, tlp=tlp, to_ids=to_ids)
+                for pulse in pulse_or_list]
     pulse = pulse_or_list
     if author:
         event_name = pulse['author_name'] + ' | ' + pulse['name']
@@ -189,7 +189,7 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
     for ind in pulse['indicators']:
         ind_type = ind['type']
         ind_val = ind['indicator']
-        ind_kwargs = dict()
+        ind_kwargs = {'to_ids': to_ids}
 
         if 'description' in ind and isinstance(ind['description'], six.text_type) and ind['description']:
             ind_kwargs['comment'] = ind['description']

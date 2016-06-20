@@ -80,6 +80,8 @@ parser.add_argument('--no-tlp', help='No Traffic Light Protocol tag',
                     action='store_false', dest='tlp')
 parser.add_argument('--discover-tags', help='Discover tags to add to MISP events',
                     action='store_true')
+parser.add_argument('--to-ids', help='Mark IOCs as exportable to IDS',
+                    action='store_true')
 parser.add_argument('--distribution',
                     help="MISP distribution of events ({}), default: {}".format(','.join(misp_distributions),
                                                                                 misp_distributions[0]),
@@ -137,7 +139,8 @@ def main(args=None):
             'threat_level': config.threat_level,
             'analysis': config.analysis,
             'tlp': config.tlp,
-            'discover_tags': config.discover_tags
+            'discover_tags': config.discover_tags,
+            'to_ids': config.to_ids
         }
         try:
             import pymisp
