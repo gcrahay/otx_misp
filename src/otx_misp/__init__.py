@@ -4,6 +4,7 @@ import logging
 import time
 from datetime import datetime
 import inspect
+import six
 
 import pymisp
 import requests
@@ -181,80 +182,88 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
                 misp.add_named_attribute(event, 'External analysis', 'link', reference)
             result_event['attributes']['references'].append(reference)
 
+    if misp and 'description' in pulse and isinstance(pulse['description'], six.text_type) and pulse['description']:
+        log.info("\t - Adding external analysis comment")
+        misp.add_named_attribute(event, 'External analysis', 'comment', pulse['description'])
+
     for ind in pulse['indicators']:
         ind_type = ind['type']
         ind_val = ind['indicator']
+        ind_kwargs = dict()
+
+        if 'description' in ind and isinstance(ind['description'], six.text_type) and ind['description']:
+            ind_kwargs['comment'] = ind['description']
 
         if ind_type == 'FileHash-SHA256':
             log.info("\t - Adding SH256 hash: {}".format(ind_val))
             if misp:
-                misp.add_hashes(event, sha256=ind_val)
+                misp.add_hashes(event, sha256=ind_val, **ind_kwargs)
             result_event['attributes']['hashes']['sha256'].append(ind_val)
 
         elif ind_type == 'FileHash-SHA1':
             log.info("\t - Adding SHA1 hash: {}".format(ind_val))
             if misp:
-                misp.add_hashes(event, sha1=ind_val)
+                misp.add_hashes(event, sha1=ind_val, **ind_kwargs)
             result_event['attributes']['hashes']['sha1'].append(ind_val)
 
         elif ind_type == 'FileHash-MD5':
             log.info("\t - Adding MD5 hash: {}".format(ind_val))
             if misp:
-                misp.add_hashes(event, md5=ind_val)
+                misp.add_hashes(event, md5=ind_val, **ind_kwargs)
             result_event['attributes']['hashes']['md5'].append(ind_val)
 
         elif ind_type == 'URI' or ind_type == 'URL':
             log.info("\t - Adding URL: {}".format(ind_val))
             if misp:
-                misp.add_url(event, ind_val)
+                misp.add_url(event, ind_val, **ind_kwargs)
             result_event['attributes']['urls'].append(ind_val)
 
         elif ind_type == 'domain':
             log.info("\t - Adding domain: {}".format(ind_val))
             if misp:
-                misp.add_domain(event, ind_val)
+                misp.add_domain(event, ind_val, **ind_kwargs)
             result_event['attributes']['domains'].append(ind_val)
 
         elif ind_type == 'hostname':
             log.info("\t - Adding hostname: {}".format(ind_val))
             if misp:
-                misp.add_hostname(event, ind_val)
+                misp.add_hostname(event, ind_val, **ind_kwargs)
             result_event['attributes']['hostnames'].append(ind_val)
 
         elif ind_type == 'IPv4' or ind_type == 'IPv6':
             log.info("\t - Adding ip: {}".format(ind_val))
             if misp:
-                misp.add_ipdst(event, ind_val)
+                misp.add_ipdst(event, ind_val, **ind_kwargs)
             result_event['attributes']['ips'].append(ind_val)
 
         elif ind_type == 'email':
             log.info("\t - Adding email: {}".format(ind_val))
             if misp:
-                misp.add_email_dst(event, ind_val)
+                misp.add_email_dst(event, ind_val, **ind_kwargs)
             result_event['attributes']['emails'].append(ind_val)
 
         elif ind_type == 'Mutex':
             log.info("\t - Adding mutex: {}".format(ind_val))
             if misp:
-                misp.add_mutex(event, ind_val)
+                misp.add_mutex(event, ind_val, **ind_kwargs)
             result_event['attributes']['mutexes'].append(ind_val)
 
         elif ind_type == 'CVE':
             log.info("\t - Adding CVE: {}".format(ind_val))
             if misp:
-                misp.add_named_attribute(event, 'External analysis', 'vulnerability', ind_val)
+                misp.add_named_attribute(event, 'External analysis', 'vulnerability', ind_val, **ind_kwargs)
             result_event['attributes']['cves'].append(ind_val)
 
         elif ind_type == 'FileHash-IMPHASH':
             log.info("\t - Adding IMPHASH hash: {}".format(ind_val))
             if misp:
-                misp.add_named_attribute(event, 'Artifacts dropped', 'imphash', ind_val)
+                misp.add_named_attribute(event, 'Artifacts dropped', 'imphash', ind_val, **ind_kwargs)
             result_event['attributes']['hashes']['imphash'].append(ind_val)
 
         elif ind_type == 'FileHash-PEHASH':
             log.info("\t - Adding PEHASH hash: {}".format(ind_val))
             if misp:
-                misp.add_named_attribute(event, 'Artifacts dropped', 'pehash', ind_val)
+                misp.add_named_attribute(event, 'Artifacts dropped', 'pehash', ind_val, **ind_kwargs)
             result_event['attributes']['hashes']['pehash'].append(ind_val)
 
         else:
