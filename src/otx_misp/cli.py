@@ -22,7 +22,7 @@ from datetime import datetime
 
 from dateutil import parser as date_parser
 
-from otx_misp.configuration import Configuration
+from otx_misp.configuration import Configuration, ConfigurationError
 from otx_misp import get_pulses, create_events
 from .otx import InvalidAPIKey, BadRequest
 
@@ -64,7 +64,7 @@ parser.add_argument('-o', '--otx', help="Alienvault OTX API key", dest='otx')
 parser.add_argument('-s', '--server', help="MISP server URL")
 parser.add_argument('-m', '--misp', help='MISP API key', dest='misp')
 parser.add_argument('-t', '--timestamp', help='Last import as Date/Time ISO format or UNIX timestamp', type=timestamp,
-                    dest='timestamp')
+                    dest='timestamp', default=datetime.utcfromtimestamp(0))
 parser.add_argument('-c', '--config-file', dest='config')
 parser.add_argument('-w', '--write-config', help='Write the configuration file', action='store_true')
 parser.add_argument('-a', '--author', help='Add the Pulse author name in the MISP Info field', action='store_true')
@@ -110,7 +110,7 @@ def main(args=None):
     try:
         config = Configuration(args)
     except Exception as ex:
-        print ex
+        log.error(ex.message)
         sys.exit(5)
 
     try:

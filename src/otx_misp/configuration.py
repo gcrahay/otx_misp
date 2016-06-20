@@ -7,7 +7,9 @@ from datetime import datetime
 
 from dateutil import parser as date_parser
 
-log = logging.getLogger('otx_misp')
+
+class ConfigurationError(Exception):
+    pass
 
 
 class Configuration(object):
@@ -45,16 +47,16 @@ class Configuration(object):
                 value = value.isoformat()
             elif isinstance(value, int):
                 value = '{}'.format(value)
-            self.config.set(self.config_section, key, value)
+            if value is not None:
+                self.config.set(self.config_section, key, value)
             if required:
                 try:
                     value = self.config.get(self.config_section, key)
                 except ConfigParser.NoOptionError:
-                    log.error("Missing required parameter: '--{}'".format(key))
-                    raise
+                    raise ConfigurationError("Missing required parameter: '--{}'".format(key))
+                print self.config.get(self.config_section, key)
                 if value is None:
-                    log.error("Missing required parameter: '--{}'".format(key))
-                    raise
+                    raise ConfigurationError("Missing required parameter: '--{}'".format(key))
 
     def __getattr__(self, item):
         if item not in self.arguments:
