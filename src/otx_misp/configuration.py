@@ -54,7 +54,6 @@ class Configuration(object):
                     value = self.config.get(self.config_section, key)
                 except ConfigParser.NoOptionError:
                     raise ConfigurationError("Missing required parameter: '--{}'".format(key))
-                print self.config.get(self.config_section, key)
                 if value is None:
                     raise ConfigurationError("Missing required parameter: '--{}'".format(key))
 
