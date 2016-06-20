@@ -24,7 +24,7 @@ def read(*names, **kwargs):
 
 setup(
     name='otx-misp',
-    version='0.2.2',
+    version='0.3.0',
     license='Apache 2.0',
     description='Imports Alienvault OTX pulses to a MISP instance.',
     long_description='%s\n%s' % (

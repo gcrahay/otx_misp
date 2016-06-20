@@ -22,7 +22,7 @@ from datetime import datetime
 
 from dateutil import parser as date_parser
 
-from otx_misp.configuration import Configuration, ConfigurationError
+from otx_misp.configuration import Configuration
 from otx_misp import get_pulses_iter as get_pulses, create_events
 from .otx import InvalidAPIKey, BadRequest
 
