@@ -75,7 +75,7 @@ def get_pulses_iter(otx_api_key, from_timestamp=None):
 
 
 def create_events(pulse_or_list, author=False, server=False, key=False, misp=False, distribution=0, threat_level=4,
-                  analysis=2, publish=True, tlp=True):
+                  analysis=2, publish=True, tlp=True, discover_tags=False):
     """
     Parse a Pulse or a list of Pulses and add it/them to MISP if server and key are present
 
@@ -91,6 +91,10 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
     :param analysis: analysis stae of the MISP object (0-2)
     :param publish: Is the MISP event should be published?
     :type publish: Boolean
+    :param tlp: Add TLP level tag to event
+    :type tlp: Boolean
+    :param discover_tags: discover MISP tags from Pulse tags
+    :type discover_tags: Boolean
     :return: a dict or a list of dict with the selected attributes
     """
     if not misp and (server and key):
@@ -98,9 +102,26 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
         try:
             misp = pymisp.PyMISP(server, key, False, 'json')
         except pymisp.PyMISPError as ex:
-            raise ImportException("Cannot connect ot MISP instance: {}".format(ex.message))
+            raise ImportException("Cannot connect to MISP instance: {}".format(ex.message))
         except Exception as ex:
-            raise ImportException("Cannot connect ot MISP instance, unknown exception: {}".format(ex.message))
+            raise ImportException("Cannot connect to MISP instance, unknown exception: {}".format(ex.message))
+    if discover_tags:
+        def get_tag_name(complete):
+            parts = complete.split('=')
+            if not len(parts):
+                return complete
+            last = parts[-1]
+            if last[0] == '"':
+                last = last[1:]
+            if last[-1] == '"':
+                last = last[:-1]
+            return last.lower()
+        raw_tags = misp.get_all_tags()
+        tags = dict()
+        for tag in raw_tags['Tag']:
+            tags[get_tag_name(tag['name'])] = tag['name']
+        misp.discovered_tags = tags
+
     if isinstance(pulse_or_list, (list, tuple)) or inspect.isgenerator(pulse_or_list):
         return [create_events(pulse, author=author, server=server, key=key, misp=misp, distribution=distribution,
                               threat_level=threat_level, analysis=analysis, publish=publish, tlp=tlp) for pulse in
@@ -144,6 +165,14 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
             log.info("\t - Adding tag: {}".format(tag))
             misp.add_tag(event, tag)
             result_event['tags'].append(tag)
+
+    if misp and hasattr(misp, 'discovered_tags') and 'tags' in pulse:
+        for pulse_tag in pulse['tags']:
+            if pulse_tag.lower() in misp.discovered_tags:
+                tag = misp.discovered_tags[pulse_tag.lower()]
+                log.info("\t - Adding tag: {}".format(tag))
+                misp.add_tag(event, tag)
+                result_event['tags'].append(tag)
 
     if 'references' in pulse:
         for reference in pulse['references']:
