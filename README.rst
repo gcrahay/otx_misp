@@ -49,6 +49,6 @@ https://otx-misp.readthedocs.io/
 Alienvault OTX SDK
 ==================
 
-All files in the `src/otx_misp/otx` directory are Copyright 2015 AlienVault, Inc. and undeer the Apache 2.0 license.
+All files in the `src/otx_misp/otx` directory are Copyright 2015 AlienVault, Inc. and under the Apache 2.0 license.
 
 
