@@ -98,12 +98,14 @@ parser.add_argument('--analysis',
 
 def main(args=None):
     args = parser.parse_args(args=args)
+    debug = False
     if args.verbose == 1:
         log.setLevel('WARNING')
     elif args.verbose == 2:
         log.setLevel('INFO')
     elif args.verbose >= 3:
         log.setLevel('DEBUG')
+        debug = True
     else:
         log.setLevel('ERROR')
     if args.simulate:
@@ -140,7 +142,8 @@ def main(args=None):
             'analysis': config.analysis,
             'tlp': config.tlp,
             'discover_tags': config.discover_tags,
-            'to_ids': config.to_ids
+            'to_ids': config.to_ids,
+            'debug': debug
         }
         try:
             import pymisp
