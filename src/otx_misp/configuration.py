@@ -5,6 +5,7 @@ import logging
 import os.path
 from datetime import datetime
 
+import io
 from dateutil import parser as date_parser
 
 
@@ -20,7 +21,8 @@ class Configuration(object):
     simulation_properties = {'otx': True, 'misp': True, 'server': True, 'timestamp': False, 'author': False,
                              'distribution': False, 'threat_level': False, 'analysis': False, 'update_timestamp': False,
                              'publish': False, 'tlp': False, 'discover_tags': False, 'to_ids': False}
-    defaults = {'distribution': 0, 'threat_level': 4, 'analysis': 2}
+    defaults = {'distribution': 0, 'threat_level': 4, 'analysis': 2, 'timestamp': datetime.utcfromtimestamp(0),
+                'update_timestamp': False}
     config_section = 'otx_misp'
 
     def __init__(self, arguments):
@@ -30,7 +32,17 @@ class Configuration(object):
         if not self.config.has_section(self.config_section):
             self.config.add_section(self.config_section)
         self.arguments = arguments
+        self.original_config = self._clone_config(self.config)
         self._populate_config()
+
+    @staticmethod
+    def _clone_config(config):
+        with io.BytesIO() as config_string:
+            config.write(config_string)
+            config_string.seek(0)
+            clone = ConfigParser.SafeConfigParser(allow_no_value=True)
+            clone.readfp(config_string)
+        return clone
 
     def _populate_config(self):
         if self.arguments.simulate:
@@ -83,6 +95,10 @@ class Configuration(object):
         return self.config.get(self.config_section, item)
 
     def write(self, fp):
+        if self.write_config:
+            config = self.config
+        else:
+            config = self.original_config
         if self.update_timestamp:
-            self.config.set(self.config_section, 'timestamp', datetime.utcnow().isoformat())
-        return self.config.write(fp)
+            config.set(self.config_section, 'timestamp', datetime.utcnow().isoformat())
+        return config.write(fp)

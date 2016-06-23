@@ -64,12 +64,12 @@ parser.add_argument('-o', '--otx', help="Alienvault OTX API key", dest='otx')
 parser.add_argument('-s', '--server', help="MISP server URL")
 parser.add_argument('-m', '--misp', help='MISP API key', dest='misp')
 parser.add_argument('-t', '--timestamp', help='Last import as Date/Time ISO format or UNIX timestamp', type=timestamp,
-                    dest='timestamp', default=datetime.utcfromtimestamp(0))
+                    dest='timestamp', default=None)
 parser.add_argument('-c', '--config-file', dest='config')
 parser.add_argument('-w', '--write-config', help='Write the configuration file', action='store_true')
 parser.add_argument('-a', '--author', help='Add the Pulse author name in the MISP Info field', action='store_true')
 parser.add_argument('-u', '--update-timestamp', help='Updates the timestamp in the configuaration file',
-                    action='store_true')
+                    action='store_const', const=True)
 parser.add_argument('-n', '--no-publish', help="Don't publish the MISP event" , action='store_false', dest='publish')
 parser.add_argument('-d', '--dry-run', help="Fetch the pulses but don't create MISP events. Use -v[v] to see details.",
                     action='store_true', dest='simulate')
@@ -152,7 +152,6 @@ def main(args=None):
     except Exception as ex:
         log.error(ex.message)
         sys.exit(21)
-
     if config.write_config or config.update_timestamp:
         if args.config:
             with open(args.config, 'w') as f:
