@@ -12,8 +12,11 @@ from .otx import OTXv2
 
 __version__ = "1.0.0"
 
-# Disable verify SSL warnings
-requests.packages.urllib3.disable_warnings()
+# Try to disable verify SSL warnings
+try:
+    requests.packages.urllib3.disable_warnings()
+except:
+    pass
 
 # Get the log handler
 log = logging.getLogger('oxt_misp')
