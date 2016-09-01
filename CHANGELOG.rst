@@ -2,6 +2,11 @@
 Changelog
 =========
 
+1.0.1 (2016-09-01)
+------------------
+
+*  Catch exceptions when disabling SSL warnings
+
 1.0.0 (2016-06-21)
 ------------------
 
