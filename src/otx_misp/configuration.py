@@ -37,11 +37,11 @@ class Configuration(object):
 
     @staticmethod
     def _clone_config(config):
-        with io.BytesIO() as config_string:
-            config.write(config_string)
-            config_string.seek(0)
-            clone = ConfigParser.SafeConfigParser(allow_no_value=True)
-            clone.readfp(config_string)
+        clone = ConfigParser.SafeConfigParser(allow_no_value=True)
+        for section in config.sections():
+            clone.add_section(section)
+            for option in config.options(section):
+                clone.set(section, option, config.get(section))
         return clone
 
     def _populate_config(self):
