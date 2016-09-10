@@ -41,7 +41,7 @@ class Configuration(object):
         for section in config.sections():
             clone.add_section(section)
             for option in config.options(section):
-                clone.set(section, option, config.get(section))
+                clone.set(section, option, config.get(section, option))
         return clone
 
     def _populate_config(self):
