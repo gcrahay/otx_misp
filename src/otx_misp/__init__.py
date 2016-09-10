@@ -10,7 +10,7 @@ import pymisp
 import requests
 from .otx import OTXv2
 
-__version__ = "1.0.2"
+__version__ = "1.0.3"
 
 # Try to disable verify SSL warnings
 try:
