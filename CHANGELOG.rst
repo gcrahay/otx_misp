@@ -2,6 +2,12 @@
 Changelog
 =========
 
+1.1 (2016-12-04)
+----------------
+
+*  Fix compatibility with PyMISP >= 2.4.53
+*  Improve Python 3 support
+
 1.0.3 (2016-09-10)
 ------------------
 

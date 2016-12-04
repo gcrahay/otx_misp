@@ -15,7 +15,7 @@ try:
 except NameError:
   basestring = str
 
-__version__ = "1.0.3"
+__version__ = "1.1"
 
 # Try to disable verify SSL warnings
 try:
