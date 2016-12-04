@@ -182,12 +182,12 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
         for reference in pulse['references']:
             log.info("\t - Adding external analysis link: {}".format(reference))
             if misp:
-                misp.add_named_attribute(event, 'External analysis', 'link', reference)
+                misp.add_named_attribute(event, 'link', reference, category='External analysis')
             result_event['attributes']['references'].append(reference)
 
     if misp and 'description' in pulse and isinstance(pulse['description'], six.text_type) and pulse['description']:
         log.info("\t - Adding external analysis comment")
-        misp.add_named_attribute(event, 'External analysis', 'comment', pulse['description'])
+        misp.add_named_attribute(event, 'comment', pulse['description'], category='External analysis')
 
     for ind in pulse['indicators']:
         ind_type = ind['type']
@@ -254,19 +254,19 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
         elif ind_type == 'CVE':
             log.info("\t - Adding CVE: {}".format(ind_val))
             if misp:
-                misp.add_named_attribute(event, 'External analysis', 'vulnerability', ind_val, **ind_kwargs)
+                misp.add_named_attribute(event, 'vulnerability', ind_val, category='External analysis', **ind_kwargs)
             result_event['attributes']['cves'].append(ind_val)
 
         elif ind_type == 'FileHash-IMPHASH':
             log.info("\t - Adding IMPHASH hash: {}".format(ind_val))
             if misp:
-                misp.add_named_attribute(event, 'Artifacts dropped', 'imphash', ind_val, **ind_kwargs)
+                misp.add_named_attribute(event, 'imphash', ind_val, category='Artifacts dropped', **ind_kwargs)
             result_event['attributes']['hashes']['imphash'].append(ind_val)
 
         elif ind_type == 'FileHash-PEHASH':
             log.info("\t - Adding PEHASH hash: {}".format(ind_val))
             if misp:
-                misp.add_named_attribute(event, 'Artifacts dropped', 'pehash', ind_val, **ind_kwargs)
+                misp.add_named_attribute(event, 'pehash', ind_val, category='Artifacts dropped', **ind_kwargs)
             result_event['attributes']['hashes']['pehash'].append(ind_val)
 
         else:
