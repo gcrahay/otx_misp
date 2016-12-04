@@ -1,6 +1,10 @@
 from __future__ import unicode_literals
 
-import ConfigParser
+try:
+    import configparser
+except ImportError:
+    import ConfigParser as configparser
+
 import logging
 import os.path
 from datetime import datetime
@@ -26,7 +30,7 @@ class Configuration(object):
     config_section = 'otx_misp'
 
     def __init__(self, arguments):
-        self.config = ConfigParser.SafeConfigParser(allow_no_value=True)
+        self.config = configparser.SafeConfigParser(allow_no_value=True)
         if arguments.config and os.path.isfile(arguments.config):
             self.config.read(arguments.config)
         if not self.config.has_section(self.config_section):
@@ -37,7 +41,7 @@ class Configuration(object):
 
     @staticmethod
     def _clone_config(config):
-        clone = ConfigParser.SafeConfigParser(allow_no_value=True)
+        clone = configparser.SafeConfigParser(allow_no_value=True)
         for section in config.sections():
             clone.add_section(section)
             for option in config.options(section):
@@ -47,7 +51,7 @@ class Configuration(object):
     def _populate_config(self):
         if self.arguments.simulate:
             self.properties = self.simulation_properties
-        for key, required in self.simulation_properties.items():
+        for key, required in list(self.simulation_properties.items()):
             value = getattr(self.arguments, key, None)
             if isinstance(value, bool):
                 if value:
@@ -65,7 +69,7 @@ class Configuration(object):
             if required:
                 try:
                     value = self.config.get(self.config_section, key)
-                except ConfigParser.NoOptionError:
+                except configparser.NoOptionError:
                     raise ConfigurationError("Missing required parameter: '--{}'".format(key))
                 if value is None:
                     raise ConfigurationError("Missing required parameter: '--{}'".format(key))

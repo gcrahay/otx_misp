@@ -10,6 +10,11 @@ import pymisp
 import requests
 from .otx import OTXv2
 
+try:
+  basestring
+except NameError:
+  basestring = str
+
 __version__ = "1.0.3"
 
 # Try to disable verify SSL warnings
