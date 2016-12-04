@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-
+from __future__ import absolute_import
 import json
 import logging
 
-import IndicatorTypes
+from . import IndicatorTypes
 
 API_V1_ROOT = "{}/api/v1/"
 PULSES_ROOT = "{}/pulses".format(API_V1_ROOT)
