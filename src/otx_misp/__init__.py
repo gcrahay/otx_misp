@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import logging
 import time
 from datetime import datetime
+from dateutil import parser as date_parser
 import inspect
 import six
 
@@ -109,7 +110,7 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
     if not misp and (server and key):
         log.debug("Connection to MISP instance: {}".format(server))
         try:
-            misp = pymisp.PyMISP(server, key, False, 'json')
+            misp = pymisp.PyMISP(server, key, ssl=False, out_type='json', debug=False)
         except pymisp.PyMISPError as ex:
             raise ImportException("Cannot connect to MISP instance: {}".format(ex.message))
         except Exception as ex:
@@ -140,7 +141,11 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
         event_name = pulse['author_name'] + ' | ' + pulse['name']
     else:
         event_name = pulse['name']
-    dt = datetime.strptime(pulse['modified'], '%Y-%m-%dT%H:%M:%S.%f')
+    try:
+        dt = date_parser.parse(pulse['modified'])
+    except (ValueError, OverflowError):
+        log.error("Cannot parse Pulse 'modified' date.")
+        dt = datetime.utcnow()
     event_date = dt.strftime('%Y-%m-%d')
     log.info("## {name} - {date}".format(name=event_name, date=event_date))
     result_event = {
