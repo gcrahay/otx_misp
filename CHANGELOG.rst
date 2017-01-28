@@ -2,6 +2,11 @@
 Changelog
 =========
 
+1.1.1 (2017-01-28)
+------------------
+
+*  Improve Pulse modified field parsing
+
 1.1 (2016-12-04)
 ----------------
 
