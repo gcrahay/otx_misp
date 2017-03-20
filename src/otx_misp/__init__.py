@@ -191,7 +191,7 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
     if 'references' in pulse:
         for reference in pulse['references']:
             log.info("\t - Adding external analysis link: {}".format(reference))
-            if misp:
+            if misp and reference:
                 misp.add_named_attribute(event, 'link', reference, category='External analysis')
             result_event['attributes']['references'].append(reference)
 
