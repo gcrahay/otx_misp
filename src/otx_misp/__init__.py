@@ -85,7 +85,7 @@ def get_pulses_iter(otx_api_key, from_timestamp=None):
 
 
 def create_events(pulse_or_list, author=False, server=False, key=False, misp=False, distribution=0, threat_level=4,
-                  analysis=2, publish=True, tlp=True, discover_tags=False, to_ids=False):
+                  analysis=2, publish=True, tlp=True, discover_tags=False, to_ids=False, author_tag=False, bulk_tag=None):
     """
     Parse a Pulse or a list of Pulses and add it/them to MISP if server and key are present
 
@@ -105,6 +105,12 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
     :type tlp: Boolean
     :param discover_tags: discover MISP tags from Pulse tags
     :type discover_tags: Boolean
+    :param to_ids: Flag pulse attributes as being sent to an IDS
+    :type to_ids: Boolean
+    :param author_tag: Add the pulse author as an event tag
+    :type author_tag: Boolean
+    :param bulk_tag: A tag that will be added to all events for categorization (e.g. OTX)
+    :type bulk_tag: String
     :return: a dict or a list of dict with the selected attributes
     """
     if not misp and (server and key):
@@ -131,10 +137,12 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
         for tag in raw_tags['Tag']:
             tags[get_tag_name(tag['name'])] = tag['name']
         misp.discovered_tags = tags
-
+        
+        
     if isinstance(pulse_or_list, (list, tuple)) or inspect.isgenerator(pulse_or_list):
         return [create_events(pulse, author=author, server=server, key=key, misp=misp, distribution=distribution,
-                              threat_level=threat_level, analysis=analysis, publish=publish, tlp=tlp, to_ids=to_ids)
+                              threat_level=threat_level, analysis=analysis, publish=publish, tlp=tlp, to_ids=to_ids, 
+                              author_tag=author_tag, bulk_tag=bulk_tag)
                 for pulse in pulse_or_list]
     pulse = pulse_or_list
     if author:
@@ -177,21 +185,29 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
         if tlp and 'TLP' in pulse:
             tag = "tlp:{}".format(pulse['TLP'])
             log.info("\t - Adding tag: {}".format(tag))
-            misp.add_tag(event, tag)
+            #misp.add_tag(event, tag)
+            misp.tag(event['Event']['uuid'], tag)
             result_event['tags'].append(tag)
+            
+        if author_tag==True:
+            misp.tag(event['Event']['uuid'], pulse['author_name'])
+            
+        if bulk_tag!=None:
+            misp.tag(event['Event']['uuid'], bulk_tag)
 
     if misp and hasattr(misp, 'discovered_tags') and 'tags' in pulse:
         for pulse_tag in pulse['tags']:
             if pulse_tag.lower() in misp.discovered_tags:
                 tag = misp.discovered_tags[pulse_tag.lower()]
                 log.info("\t - Adding tag: {}".format(tag))
-                misp.add_tag(event, tag)
+                #misp.add_tag(event, tag)
+                misp.tag(event['Event']['uuid'], tag)
                 result_event['tags'].append(tag)
 
     if 'references' in pulse:
         for reference in pulse['references']:
             log.info("\t - Adding external analysis link: {}".format(reference))
-            if misp:
+            if misp and reference:
                 misp.add_named_attribute(event, 'link', reference, category='External analysis')
             result_event['attributes']['references'].append(reference)
 
