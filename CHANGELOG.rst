@@ -2,6 +2,13 @@
 Changelog
 =========
 
+1.1.2 (2017-03-24)
+------------------
+
+*  Fixes event tagging 
+*  Adds additional tagging options
+
+
 1.1.1 (2017-01-28)
 ------------------
 
