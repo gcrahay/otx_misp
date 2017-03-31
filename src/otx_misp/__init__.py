@@ -38,8 +38,8 @@ def get_pulses(otx_api_key, from_timestamp=None):
 
     :param otx_api_key: Alienvault OTX API key
     :type otx_api_key: string
-    :param from_timestamp: only downlaod Pulses after this Ddate/time (None for all Pulses)
-    :type from_timestamp: :class:`datetine.datetine` or ISO string or Unix tinestamp
+    :param from_timestamp: only download Pulses after this date/time (None for all Pulses)
+    :type from_timestamp: :class:`datetime.datetime` or ISO string or Unix timestamp
     :return: a list of Pulses (dict)
     """
     otx = OTXv2(otx_api_key)
@@ -66,8 +66,8 @@ def get_pulses_iter(otx_api_key, from_timestamp=None):
 
     :param otx_api_key: Alienvault OTX API key
     :type otx_api_key: string
-    :param from_timestamp: only downlaod Pulses after this Ddate/time (None for all Pulses)
-    :type from_timestamp: :class:`datetine.datetine` or ISO string or Unix tinestamp
+    :param from_timestamp: only download Pulses after this date/time (None for all Pulses)
+    :type from_timestamp: :class:`datetime.datetime` or ISO string or Unix timestamp
     :return: a generator of Pulses (dict)
     """
     otx = OTXv2(otx_api_key)
@@ -85,8 +85,8 @@ def get_pulses_iter(otx_api_key, from_timestamp=None):
 
 
 def create_events(pulse_or_list, author=False, server=False, key=False, misp=False, distribution=0, threat_level=4,
-                  analysis=2, publish=True, tlp=True, discover_tags=False, to_ids=False, author_tag=False, bulk_tag=None,
-                  dedup_titles=False):
+                  analysis=2, publish=True, tlp=True, discover_tags=False, to_ids=False, author_tag=False,
+                  bulk_tag=None, dedup_titles=False):
     """
     Parse a Pulse or a list of Pulses and add it/them to MISP if server and key are present
 
