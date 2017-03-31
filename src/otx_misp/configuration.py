@@ -21,12 +21,12 @@ class Configuration(object):
     """ Object holding the configuration """
     properties = {'otx': True, 'misp': True, 'server': True, 'timestamp': False, 'author': False,
                   'distribution': False, 'threat_level': False, 'analysis': False, 'update_timestamp': False,
-                  'publish': False, 'tlp': False, 'discover_tags': False, 'to_ids': False, 'author_tag': False, 'bulk_tag': False,
-                  'dedup_titles': False}
+                  'publish': False, 'tlp': False, 'discover_tags': False, 'to_ids': False, 'author_tag': False,
+                  'bulk_tag': False, 'dedup_titles': False}
     simulation_properties = {'otx': True, 'misp': True, 'server': True, 'timestamp': False, 'author': False,
                              'distribution': False, 'threat_level': False, 'analysis': False, 'update_timestamp': False,
-                             'publish': False, 'tlp': False, 'discover_tags': False, 'to_ids': False, 'author_tag': False, 'bulk_tag': False,
-                             'dedup_titles': False}
+                             'publish': False, 'tlp': False, 'discover_tags': False, 'to_ids': False,
+                             'author_tag': False, 'bulk_tag': False, 'dedup_titles': False}
     defaults = {'distribution': 0, 'threat_level': 4, 'analysis': 2, 'timestamp': datetime.utcfromtimestamp(0),
                 'update_timestamp': False}
     config_section = 'otx_misp'

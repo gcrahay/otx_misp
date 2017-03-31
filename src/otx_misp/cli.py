@@ -98,7 +98,8 @@ parser.add_argument('--author-tag', help="Add the pulse author as an event tag",
                     action='store_true')
 parser.add_argument('--bulk-tag', help="Add a custom tag that will be added to all events (e.g. OTX)",
                     type=str)
-parser.add_argument('--dedup-titles', help="Search MISP for an existing event title and update it, rather than create a new one",
+parser.add_argument('--dedup-titles',
+                    help="Search MISP for an existing event title and update it, rather than create a new one",
                     action='store_true')
 
 

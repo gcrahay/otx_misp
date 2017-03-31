@@ -140,8 +140,7 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
         for tag in raw_tags['Tag']:
             tags[get_tag_name(tag['name'])] = tag['name']
         misp.discovered_tags = tags
-        
-        
+
     if isinstance(pulse_or_list, (list, tuple)) or inspect.isgenerator(pulse_or_list):
         return [create_events(pulse, author=author, server=server, key=key, misp=misp, distribution=distribution,
                               threat_level=threat_level, analysis=analysis, publish=publish, tlp=tlp, to_ids=to_ids, 
@@ -183,7 +182,7 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
     }
 
     if misp:
-        if dedup_titles==False:
+        if not dedup_titles:
             event = misp.new_event(distribution, threat_level, analysis, event_name, date=event_date, published=publish)
         else:
             event=''
@@ -197,19 +196,20 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
             # Search MISP for the title
             result = misp.search_index(eventinfo=event_name)
             if 'message' in result:
-                if result['message']=="No matches.":
-                    event = misp.new_event(distribution, threat_level, analysis, event_name, date=event_date, published=publish)
+                if result['message'] == "No matches.":
+                    event = misp.new_event(distribution, threat_level, analysis, event_name, date=event_date,
+                                           published=publish)
             else:
                 for evt in result['response']:
                     # If it exists, set 'event' to the event
-                    if evt['info']==event_name:
-                        event = {}
-                        event['Event'] = evt
+                    if evt['info'] == event_name:
+                        event = {'Event': evt}
                         break
-                if event=='':
+                if event == '':
                     # Event not found, even though search results were returned
                     # Build new event
-                    event = misp.new_event(distribution, threat_level, analysis, event_name, date=event_date, published=publish)
+                    event = misp.new_event(distribution, threat_level, analysis, event_name, date=event_date,
+                                           published=publish)
             
         time.sleep(0.2)
         if tlp and 'TLP' in pulse:
@@ -219,10 +219,10 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
             misp.tag(event['Event']['uuid'], tag)
             result_event['tags'].append(tag)
             
-        if author_tag==True:
+        if author_tag:
             misp.tag(event['Event']['uuid'], pulse['author_name'])
             
-        if bulk_tag!=None:
+        if bulk_tag is not None:
             misp.tag(event['Event']['uuid'], bulk_tag)
 
     if misp and hasattr(misp, 'discovered_tags') and 'tags' in pulse:
