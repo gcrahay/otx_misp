@@ -31,6 +31,24 @@ log = logging.getLogger('oxt_misp')
 class ImportException(Exception):
     pass
 
+# MISP instance version
+_misp_server_version = None
+
+
+def misp_server_version(misp):
+    """
+    Retrieve the MISP instance version
+    
+    :param misp: MISP connection object
+    :type misp: :class:`pymisp.PyMISP`
+    :return: MISP instance version as string
+    """
+    global _misp_server_version
+    if _misp_server_version is None:
+        version = misp.get_version()
+        _misp_server_version = version['version']
+    return _misp_server_version
+
 
 def tag_event(misp, event, tag):
     """
@@ -43,7 +61,18 @@ def tag_event(misp, event, tag):
     :return: None
     """
     if hasattr(misp, 'tag'):
-        misp.tag(event['Event']['uuid'], tag)
+        version = misp_server_version(misp).split('.')
+        tag_version = '2.4.69'.split('.')
+        for a, b in zip(version, tag_version):
+            if a == b:
+                continue
+            elif a > b:
+                continue
+            else:  # a < b
+                misp.add_tag(event, tag)
+                return
+        print "Using new tag method", event['Event']['uuid'], tag
+        print misp.tag(event['Event']['uuid'], tag)
     else:
         misp.add_tag(event, tag)
 
@@ -233,10 +262,10 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
             log.info("\t - Adding tag: {}".format(tag))
             tag_event(misp, event, tag)
             result_event['tags'].append(tag)
-            
+
         if author_tag:
             tag_event(misp, event, pulse['author_name'])
-            
+
         if bulk_tag is not None:
             tag_event(misp, event, bulk_tag)
 
