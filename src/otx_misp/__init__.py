@@ -71,8 +71,7 @@ def tag_event(misp, event, tag):
             else:  # a < b
                 misp.add_tag(event, tag)
                 return
-        print "Using new tag method", event['Event']['uuid'], tag
-        print misp.tag(event['Event']['uuid'], tag)
+        misp.tag(event['Event']['uuid'], tag)
     else:
         misp.add_tag(event, tag)
 
