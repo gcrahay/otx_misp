@@ -16,7 +16,7 @@ try:
 except NameError:
   basestring = str
 
-__version__ = "1.1.1"
+__version__ = "1.2.0"
 
 # Try to disable verify SSL warnings
 try:
@@ -31,6 +31,51 @@ log = logging.getLogger('oxt_misp')
 class ImportException(Exception):
     pass
 
+# MISP instance version
+_misp_server_version = None
+
+
+def misp_server_version(misp):
+    """
+    Retrieve the MISP instance version
+    
+    :param misp: MISP connection object
+    :type misp: :class:`pymisp.PyMISP`
+    :return: MISP instance version as string
+    """
+    global _misp_server_version
+    if _misp_server_version is None:
+        version = misp.get_version()
+        _misp_server_version = version['version']
+    return _misp_server_version
+
+
+def tag_event(misp, event, tag):
+    """
+    Add a tag to a MISP event
+    
+    :param misp: MISP connection object
+    :type misp: :class:`pymisp.PyMISP` 
+    :param event: a MISP event
+    :param tag: tag to add
+    :return: None
+    """
+    if hasattr(misp, 'tag'):
+        version = misp_server_version(misp).split('.')
+        tag_version = '2.4.69'.split('.')
+        for a, b in zip(version, tag_version):
+            if a == b:
+                continue
+            elif a > b:
+                continue
+            else:  # a < b
+                misp.add_tag(event, tag)
+                return
+        print "Using new tag method", event['Event']['uuid'], tag
+        print misp.tag(event['Event']['uuid'], tag)
+    else:
+        misp.add_tag(event, tag)
+
 
 def get_pulses(otx_api_key, from_timestamp=None):
     """
@@ -38,8 +83,8 @@ def get_pulses(otx_api_key, from_timestamp=None):
 
     :param otx_api_key: Alienvault OTX API key
     :type otx_api_key: string
-    :param from_timestamp: only downlaod Pulses after this Ddate/time (None for all Pulses)
-    :type from_timestamp: :class:`datetine.datetine` or ISO string or Unix tinestamp
+    :param from_timestamp: only download Pulses after this date/time (None for all Pulses)
+    :type from_timestamp: :class:`datetime.datetime` or ISO string or Unix timestamp
     :return: a list of Pulses (dict)
     """
     otx = OTXv2(otx_api_key)
@@ -66,8 +111,8 @@ def get_pulses_iter(otx_api_key, from_timestamp=None):
 
     :param otx_api_key: Alienvault OTX API key
     :type otx_api_key: string
-    :param from_timestamp: only downlaod Pulses after this Ddate/time (None for all Pulses)
-    :type from_timestamp: :class:`datetine.datetine` or ISO string or Unix tinestamp
+    :param from_timestamp: only download Pulses after this date/time (None for all Pulses)
+    :type from_timestamp: :class:`datetime.datetime` or ISO string or Unix timestamp
     :return: a generator of Pulses (dict)
     """
     otx = OTXv2(otx_api_key)
@@ -85,7 +130,8 @@ def get_pulses_iter(otx_api_key, from_timestamp=None):
 
 
 def create_events(pulse_or_list, author=False, server=False, key=False, misp=False, distribution=0, threat_level=4,
-                  analysis=2, publish=True, tlp=True, discover_tags=False, to_ids=False):
+                  analysis=2, publish=True, tlp=True, discover_tags=False, to_ids=False, author_tag=False,
+                  bulk_tag=None, dedup_titles=False):
     """
     Parse a Pulse or a list of Pulses and add it/them to MISP if server and key are present
 
@@ -105,6 +151,14 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
     :type tlp: Boolean
     :param discover_tags: discover MISP tags from Pulse tags
     :type discover_tags: Boolean
+    :param to_ids: Flag pulse attributes as being sent to an IDS
+    :type to_ids: Boolean
+    :param author_tag: Add the pulse author as an event tag
+    :type author_tag: Boolean
+    :param bulk_tag: A tag that will be added to all events for categorization (e.g. OTX)
+    :type bulk_tag: String
+    :param dedup_titles: Search MISP for an existing event title and update it, rather than create a new one
+    :type dedup_titles: Boolean
     :return: a dict or a list of dict with the selected attributes
     """
     if not misp and (server and key):
@@ -134,7 +188,8 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
 
     if isinstance(pulse_or_list, (list, tuple)) or inspect.isgenerator(pulse_or_list):
         return [create_events(pulse, author=author, server=server, key=key, misp=misp, distribution=distribution,
-                              threat_level=threat_level, analysis=analysis, publish=publish, tlp=tlp, to_ids=to_ids)
+                              threat_level=threat_level, analysis=analysis, publish=publish, tlp=tlp, to_ids=to_ids, 
+                              author_tag=author_tag, bulk_tag=bulk_tag, dedup_titles=dedup_titles)
                 for pulse in pulse_or_list]
     pulse = pulse_or_list
     if author:
@@ -172,28 +227,63 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
     }
 
     if misp:
-        event = misp.new_event(distribution, threat_level, analysis, event_name, date=event_date, published=publish)
+        if not dedup_titles:
+            event = misp.new_event(distribution, threat_level, analysis, event_name, date=event_date, published=publish)
+        else:
+            event=''
+            # Check if username is added to title
+            # Build the title
+            if author:
+                event_name = pulse['author_name'] + ' | ' + pulse['name']
+            else:
+                event_name = pulse['name']
+            
+            # Search MISP for the title
+            result = misp.search_index(eventinfo=event_name)
+            if 'message' in result:
+                if result['message'] == "No matches.":
+                    event = misp.new_event(distribution, threat_level, analysis, event_name, date=event_date,
+                                           published=publish)
+            else:
+                for evt in result['response']:
+                    # If it exists, set 'event' to the event
+                    if evt['info'] == event_name:
+                        event = {'Event': evt}
+                        break
+                if event == '':
+                    # Event not found, even though search results were returned
+                    # Build new event
+                    event = misp.new_event(distribution, threat_level, analysis, event_name, date=event_date,
+                                           published=publish)
+            
         time.sleep(0.2)
         if tlp and 'TLP' in pulse:
             tag = "tlp:{}".format(pulse['TLP'])
             log.info("\t - Adding tag: {}".format(tag))
-            misp.add_tag(event, tag)
+            tag_event(misp, event, tag)
             result_event['tags'].append(tag)
+
+        if author_tag:
+            tag_event(misp, event, pulse['author_name'])
+
+        if bulk_tag is not None:
+            tag_event(misp, event, bulk_tag)
 
     if misp and hasattr(misp, 'discovered_tags') and 'tags' in pulse:
         for pulse_tag in pulse['tags']:
             if pulse_tag.lower() in misp.discovered_tags:
                 tag = misp.discovered_tags[pulse_tag.lower()]
                 log.info("\t - Adding tag: {}".format(tag))
-                misp.add_tag(event, tag)
+                tag_event(misp, event, tag)
                 result_event['tags'].append(tag)
 
     if 'references' in pulse:
         for reference in pulse['references']:
-            log.info("\t - Adding external analysis link: {}".format(reference))
-            if misp:
-                misp.add_named_attribute(event, 'link', reference, category='External analysis')
-            result_event['attributes']['references'].append(reference)
+            if reference:
+                log.info("\t - Adding external analysis link: {}".format(reference))
+                if misp:
+                    misp.add_named_attribute(event, 'link', reference, category='External analysis')
+                result_event['attributes']['references'].append(reference)
 
     if misp and 'description' in pulse and isinstance(pulse['description'], six.text_type) and pulse['description']:
         log.info("\t - Adding external analysis comment")

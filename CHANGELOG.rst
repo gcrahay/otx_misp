@@ -2,6 +2,14 @@
 Changelog
 =========
 
+1.2.0 (2017-03-31)
+------------------
+
+*  Fixes event tagging 
+*  Adds additional tagging options
+*  Handles empty reference field in OTX pulses
+
+
 1.1.1 (2017-01-28)
 ------------------
 
