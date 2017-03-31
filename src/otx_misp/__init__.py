@@ -32,6 +32,22 @@ class ImportException(Exception):
     pass
 
 
+def tag_event(misp, event, tag):
+    """
+    Add a tag to a MISP event
+    
+    :param misp: MISP connection object
+    :type misp: :class:`pymisp.PyMISP` 
+    :param event: a MISP event
+    :param tag: tag to add
+    :return: None
+    """
+    if hasattr(misp, 'tag'):
+        misp.tag(event['Event']['uuid'], tag)
+    else:
+        misp.add_tag(event, tag)
+
+
 def get_pulses(otx_api_key, from_timestamp=None):
     """
     Get the Pulses from Alienvault OTX
@@ -215,23 +231,21 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
         if tlp and 'TLP' in pulse:
             tag = "tlp:{}".format(pulse['TLP'])
             log.info("\t - Adding tag: {}".format(tag))
-            #misp.add_tag(event, tag)
-            misp.tag(event['Event']['uuid'], tag)
+            tag_event(misp, event, tag)
             result_event['tags'].append(tag)
             
         if author_tag:
-            misp.tag(event['Event']['uuid'], pulse['author_name'])
+            tag_event(misp, event, pulse['author_name'])
             
         if bulk_tag is not None:
-            misp.tag(event['Event']['uuid'], bulk_tag)
+            tag_event(misp, event, bulk_tag)
 
     if misp and hasattr(misp, 'discovered_tags') and 'tags' in pulse:
         for pulse_tag in pulse['tags']:
             if pulse_tag.lower() in misp.discovered_tags:
                 tag = misp.discovered_tags[pulse_tag.lower()]
                 log.info("\t - Adding tag: {}".format(tag))
-                #misp.add_tag(event, tag)
-                misp.tag(event['Event']['uuid'], tag)
+                tag_event(misp, event, tag)
                 result_event['tags'].append(tag)
 
     if 'references' in pulse:
