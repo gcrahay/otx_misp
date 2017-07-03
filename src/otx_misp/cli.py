@@ -94,6 +94,13 @@ parser.add_argument('--analysis',
                     help="MISP analysis state of events ({}), default: {}".format(','.join(misp_analysis),
                                                                                   misp_analysis[2]),
                     type=get_misp_type(misp_analysis), default=None)
+parser.add_argument('--author-tag', help="Add the pulse author as an event tag",
+                    action='store_true')
+parser.add_argument('--bulk-tag', help="Add a custom tag that will be added to all events (e.g. OTX)",
+                    type=str)
+parser.add_argument('--dedup-titles',
+                    help="Search MISP for an existing event title and update it, rather than create a new one",
+                    action='store_true')
 
 
 def main(args=None):
@@ -140,7 +147,10 @@ def main(args=None):
             'analysis': config.analysis,
             'tlp': config.tlp,
             'discover_tags': config.discover_tags,
-            'to_ids': config.to_ids
+            'to_ids': config.to_ids,
+            'author_tag': config.author_tag,
+            'bulk_tag': config.bulk_tag,
+            'dedup_titles': config.dedup_titles
         }
         try:
             import pymisp
