@@ -258,11 +258,16 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
                                            published=publish)
             
         time.sleep(0.2)
-        if tlp and 'TLP' in pulse:
-            tag = "tlp:{}".format(pulse['TLP'])
-            log.info("\t - Adding tag: {}".format(tag))
-            tag_event(misp, event, tag)
-            result_event['tags'].append(tag)
+        if tlp:
+            tag = None
+            if 'TLP' in pulse:
+                tag = "tlp:{}".format(pulse['TLP'])
+            elif 'tlp' in pulse:
+                tag = "tlp:{}".format(pulse['tlp'])
+            if tag is not None:
+                log.info("\t - Adding tag: {}".format(tag))
+                tag_event(misp, event, tag)
+                result_event['tags'].append(tag)
 
         if author_tag:
             tag_event(misp, event, pulse['author_name'])
