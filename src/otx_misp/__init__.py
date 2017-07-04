@@ -221,7 +221,8 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
             'emails': list(),
             'mutexes': list(),
             'references': list(),
-            'cves': list()
+            'cves': list(),
+            'filenames': list()
         },
     }
 
@@ -304,7 +305,7 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
             ind_kwargs['comment'] = ind['description']
 
         if ind_type == 'FileHash-SHA256':
-            log.info("\t - Adding SH256 hash: {}".format(ind_val))
+            log.info("\t - Adding SHA256 hash: {}".format(ind_val))
             if misp:
                 misp.add_hashes(event, sha256=ind_val, **ind_kwargs)
             result_event['attributes']['hashes']['sha256'].append(ind_val)
@@ -374,6 +375,12 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
             if misp:
                 misp.add_named_attribute(event, 'pehash', ind_val, category='Artifacts dropped', **ind_kwargs)
             result_event['attributes']['hashes']['pehash'].append(ind_val)
+
+        elif ind_type == 'FilePath':
+            log.info("\t - Adding filename: {}".format(ind_val))
+            if misp:
+                misp.add_filename(event, ind_val, category='Artifacts dropped', **ind_kwargs)
+            result_event['attributes']['filenames'].append(ind_val)
 
         else:
             log.warning("Unsupported indicator type: %s" % ind_type)
