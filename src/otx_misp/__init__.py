@@ -229,7 +229,7 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
         if not dedup_titles:
             event = misp.new_event(distribution, threat_level, analysis, event_name, date=event_date, published=publish)
         else:
-            event=''
+            event = ''
             # Check if username is added to title
             # Build the title
             if author:
@@ -247,6 +247,8 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
                 for evt in result['response']:
                     # If it exists, set 'event' to the event
                     if evt['info'] == event_name:
+                        if 'SharingGroup' in evt:
+                            del evt['SharingGroup']  # This deletes the SharingGroup from the list, thx SparkyNZL
                         event = {'Event': evt}
                         break
                 if event == '':
