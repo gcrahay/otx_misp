@@ -130,7 +130,7 @@ def get_pulses_iter(otx_api_key, from_timestamp=None):
 
 def create_events(pulse_or_list, author=False, server=False, key=False, misp=False, distribution=0, threat_level=4,
                   analysis=2, publish=True, tlp=True, discover_tags=False, to_ids=False, author_tag=False,
-                  bulk_tag=None, dedup_titles=False):
+                  bulk_tag=None, dedup_titles=False, stop_on_error=False):
     """
     Parse a Pulse or a list of Pulses and add it/them to MISP if server and key are present
 
@@ -186,10 +186,23 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
         misp.discovered_tags = tags
 
     if isinstance(pulse_or_list, (list, tuple)) or inspect.isgenerator(pulse_or_list):
-        return [create_events(pulse, author=author, server=server, key=key, misp=misp, distribution=distribution,
-                              threat_level=threat_level, analysis=analysis, publish=publish, tlp=tlp, to_ids=to_ids, 
-                              author_tag=author_tag, bulk_tag=bulk_tag, dedup_titles=dedup_titles)
-                for pulse in pulse_or_list]
+        misp_events = []
+        for pulse in pulse_or_list:
+            try:
+                misp_event = create_events(pulse, author=author, server=server, key=key, misp=misp,
+                                           distribution=distribution, threat_level=threat_level, analysis=analysis,
+                                           publish=publish, tlp=tlp, to_ids=to_ids, author_tag=author_tag,
+                                           bulk_tag=bulk_tag, dedup_titles=dedup_titles, stop_on_error=stop_on_error)
+                misp_events.append(misp_event)
+            except Exception as ex:
+                if stop_on_error:
+                    raise
+                name = ''
+                if pulse and 'name' in pulse:
+                    name = pulse['name']
+                log.error("Cannot import pulse {}: {}".format(name, ex))
+        return misp_events
+
     pulse = pulse_or_list
     if author:
         event_name = pulse['author_name'] + ' | ' + pulse['name']
@@ -237,7 +250,7 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
                 event_name = pulse['author_name'] + ' | ' + pulse['name']
             else:
                 event_name = pulse['name']
-            
+
             # Search MISP for the title
             result = misp.search_index(eventinfo=event_name)
             if 'message' in result:
@@ -257,7 +270,7 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
                     # Build new event
                     event = misp.new_event(distribution, threat_level, analysis, event_name, date=event_date,
                                            published=publish)
-            
+
         time.sleep(0.2)
         if tlp:
             tag = None

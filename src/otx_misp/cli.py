@@ -101,6 +101,9 @@ parser.add_argument('--bulk-tag', help="Add a custom tag that will be added to a
 parser.add_argument('--dedup-titles',
                     help="Search MISP for an existing event title and update it, rather than create a new one",
                     action='store_true')
+parser.add_argument('--stop-on-error',
+                    help="Stop import when an exception is raised",
+                    action='store_true')
 
 
 def main(args=None):
@@ -150,7 +153,8 @@ def main(args=None):
             'to_ids': config.to_ids,
             'author_tag': config.author_tag,
             'bulk_tag': config.bulk_tag,
-            'dedup_titles': config.dedup_titles
+            'dedup_titles': config.dedup_titles,
+            'stop_on_error': config.stop_on_error
         }
         try:
             import pymisp
