@@ -3,6 +3,16 @@ Changelog
 =========
 
 
+1.3.0 (2017-07-04)
+------------------
+
+*  Fix dedup function
+*  Fix TLP tag import
+*  Don't stop on import error
+*  Python 2 support warning
+*  Tested with Python 3.5, MISP 2.4.[71-76], PyMISP 2.4.71
+
+
 1.2.1 (2017-03-31)
 ------------------
 

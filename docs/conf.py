@@ -24,10 +24,10 @@ if os.getenv('SPELLCHECK'):
 source_suffix = '.rst'
 master_doc = 'index'
 project = u'OTX to MISP'
-year = '2016'
+year = '2017'
 author = u'Gaetan Crahay'
 copyright = '{0}, {1}'.format(year, author)
-version = release = u'1.2.1'
+version = release = u'1.3.0'
 
 pygments_style = 'trac'
 templates_path = ['.']

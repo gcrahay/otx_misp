@@ -37,6 +37,8 @@ Imports Alienvault OTX pulses to a MISP instance.
 Installation
 ============
 
+Python 2 support will be dropped soon.
+
 ::
 
     pip install otx-misp
