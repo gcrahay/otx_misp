@@ -186,10 +186,19 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
         misp.discovered_tags = tags
 
     if isinstance(pulse_or_list, (list, tuple)) or inspect.isgenerator(pulse_or_list):
-        return [create_events(pulse, author=author, server=server, key=key, misp=misp, distribution=distribution,
+        result_event = []
+        for pulse in pulse_or_list:
+          try:
+            result = create_events(pulse, author=author, server=server, key=key, misp=misp, distribution=distribution,
                               threat_level=threat_level, analysis=analysis, publish=publish, tlp=tlp, to_ids=to_ids, 
                               author_tag=author_tag, bulk_tag=bulk_tag, dedup_titles=dedup_titles)
-                for pulse in pulse_or_list]
+            result_event.append(result)
+          except:
+            pass
+          
+        return result_event
+
+
     pulse = pulse_or_list
     if author:
         event_name = pulse['author_name'] + ' | ' + pulse['name']
