@@ -235,7 +235,8 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
             'mutexes': list(),
             'references': list(),
             'cves': list(),
-            'filenames': list()
+            'filenames': list(),
+            'yara': list()
         },
     }
 
@@ -394,6 +395,24 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
             if misp:
                 misp.add_filename(event, ind_val, category='Artifacts dropped', **ind_kwargs)
             result_event['attributes']['filenames'].append(ind_val)
+
+        elif ind_type == 'YARA':
+            ind_title = ind.get('title', ind_val)
+            ind_desc = ind.get('description', '')
+            if ind_title == '':
+                ind_title = ind_val
+                if not ind_desc == '':
+                    ind_kwargs['comment'] = ind_desc
+            else:
+                ind_kwargs['comment'] = "{} {}".format(ind_title, ind_desc)
+            ind_val = ind.get('content', None)
+            if ind_val is None or ind_val == "":
+                log.warning("YARA indicator is empty: %s" % ind_title)
+                continue
+            log.info("\t - Adding YARA rule: {}".format(ind_title))
+            if misp:
+                misp.add_yara(event, ind_val, category='Artifacts dropped', **ind_kwargs)
+            result_event['attributes']['yara'].append({'title': ind_title, 'content': ind_val})
 
         else:
             log.warning("Unsupported indicator type: %s" % ind_type)
