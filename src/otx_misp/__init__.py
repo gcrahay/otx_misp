@@ -163,7 +163,7 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
     if not misp and (server and key):
         log.debug("Connection to MISP instance: {}".format(server))
         try:
-            misp = pymisp.PyMISP(server, key, ssl=False, out_type='json', debug=False)
+            misp = pymisp.PyMISP(server, key, ssl=False, out_type='json')
         except pymisp.PyMISPError as ex:
             raise ImportException("Cannot connect to MISP instance: {}".format(ex.message))
         except Exception as ex:
