@@ -211,7 +211,7 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
     try:
         dt = date_parser.parse(pulse['created'])
     except (ValueError, OverflowError):
-        log.error("Cannot parse Pulse 'modified' date.")
+        log.error("Cannot parse Pulse 'created' date.")
         dt = datetime.utcnow()
     event_date = dt.strftime('%Y-%m-%d')
     log.info("## {name} - {date}".format(name=event_name, date=event_date))
