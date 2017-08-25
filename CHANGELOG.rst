@@ -3,6 +3,13 @@ Changelog
 =========
 
 
+1.4.1 (2017-08-25)
+------------------
+
+*  Fix MISP tag name parsing (@KALRONG)
+*  Use pulse 'created' date in MISP event (@obert01)
+
+
 1.4.0 (2017-08-14)
 ------------------
 
