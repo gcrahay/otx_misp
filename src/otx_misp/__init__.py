@@ -174,6 +174,8 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
             if not len(parts):
                 return complete
             last = parts[-1]
+            if not len(last):
+                return complete
             if last[0] == '"':
                 last = last[1:]
             if last[-1] == '"':
