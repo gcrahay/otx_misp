@@ -164,7 +164,7 @@ def main(args=None):
     try:
         create_events(pulses, author=config.author, **kwargs)
     except Exception as ex:
-        log.error(ex.message)
+        log.error("Error: {}".format(ex))
         sys.exit(21)
     if config.write_config or config.update_timestamp:
         if args.config:
