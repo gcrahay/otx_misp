@@ -26,7 +26,7 @@ from otx_misp.configuration import Configuration
 from otx_misp import get_pulses_iter as get_pulses, create_events
 from .otx import InvalidAPIKey, BadRequest
 
-log = logging.getLogger('oxt_misp')
+log = logging.getLogger('otx_misp')
 console_handler = logging.StreamHandler()
 log.addHandler(console_handler)
 
