@@ -25,7 +25,7 @@ except:
     pass
 
 # Get the log handler
-log = logging.getLogger('oxt_misp')
+log = logging.getLogger('otx_misp')
 
 
 class ImportException(Exception):
