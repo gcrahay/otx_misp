@@ -3,6 +3,14 @@ Changelog
 =========
 
 
+1.4.2 (2018-05-11)
+------------------
+
+*  Fix typo in logger name (@TheDr1ver)
+*  Don't add already attached tag to events
+*  Tested with Python 3.5 and MISP 2.4.89
+
+
 1.4.1 (2017-08-25)
 ------------------
 
