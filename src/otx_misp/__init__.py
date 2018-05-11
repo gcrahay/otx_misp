@@ -60,6 +60,17 @@ def tag_event(misp, event, tag):
     :param tag: tag to add
     :return: None
     """
+    if not hasattr(misp, '_otx_tags_cache'):
+        misp._otx_tags_cache = misp.get_all_tags()['Tag']
+    for exist_tag in misp._otx_tags_cache:
+        if exist_tag['name'] == tag:
+            tag_id = exist_tag['id']
+            if 'EventTag' in event:
+                for evt_tag in event['EventTag']:
+                    if tag_id == evt_tag['id']:
+                        log.info("\t - Tag already exists. Skipping:".format(tag))
+                        return
+            break
     if hasattr(misp, 'tag'):
         version = misp_server_version(misp).split('.')
         tag_version = '2.4.69'.split('.')
