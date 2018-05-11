@@ -316,18 +316,18 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
             if reference:
                 log.info("\t - Adding external analysis link: {}".format(reference))
                 if misp:
-                    misp.add_named_attribute(event, 'link', reference, category='External analysis')
+                    misp.add_named_attribute(event, 'link', reference, category='External analysis', distribution=5)
                 result_event['attributes']['references'].append(reference)
 
     if misp and 'description' in pulse and isinstance(pulse['description'], six.text_type) and pulse['description']:
         log.info("\t - Adding external analysis comment")
-        misp.add_named_attribute(event, 'comment', pulse['description'], category='External analysis')
+        misp.add_named_attribute(event, 'comment', pulse['description'], category='External analysis', distribution=5)
 
     for ind in pulse['indicators']:
         ind_type = ind['type']
         ind_val = ind['indicator']
-        ind_kwargs = {'to_ids': to_ids}
-
+        ind_kwargs = {'to_ids': to_ids, 'distribution': 5}
+        
         if 'description' in ind and isinstance(ind['description'], six.text_type) and ind['description']:
             ind_kwargs['comment'] = ind['description']
 
