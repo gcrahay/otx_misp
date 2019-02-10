@@ -3,6 +3,12 @@ Changelog
 =========
 
 
+1.4.3 (2019-02-10)
+------------------
+
+*  Fixed the PyMISP version check in add tag wrapper (@obert01)
+
+
 1.4.2 (2018-05-11)
 ------------------
 

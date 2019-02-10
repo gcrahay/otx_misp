@@ -27,7 +27,7 @@ project = u'OTX to MISP'
 year = '2017'
 author = u'Gaetan Crahay'
 copyright = '{0}, {1}'.format(year, author)
-version = release = u'1.4.2'
+version = release = u'1.4.3'
 
 pygments_style = 'trac'
 templates_path = ['.']
