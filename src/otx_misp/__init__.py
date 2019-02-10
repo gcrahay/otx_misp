@@ -77,7 +77,7 @@ def tag_event(misp, event, tag):
         for a, b in zip(version, tag_version):
             if a == b:
                 continue
-            elif a > b:
+            elif int(a) > int(b):
                 continue
             else:  # a < b
                 misp.add_tag(event, tag)
