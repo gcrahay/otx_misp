@@ -266,7 +266,8 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
                 event_name = pulse['name']
 
             # Search MISP for the title
-            result = misp.search_index(eventinfo=event_name)
+            search_term = event_name.replace("|","\|")
+            result = misp.search_index(eventinfo=search_term)
             if 'message' in result:
                 if result['message'] == "No matches.":
                     event = misp.new_event(distribution, threat_level, analysis, event_name, date=event_date,
