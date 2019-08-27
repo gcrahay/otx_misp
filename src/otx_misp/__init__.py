@@ -140,7 +140,7 @@ def get_pulses_iter(otx_api_key, from_timestamp=None):
 
 
 def create_events(pulse_or_list, author=False, server=False, key=False, misp=False, distribution=0, threat_level=4,
-                  analysis=2, publish=True, tlp=True, discover_tags=False, to_ids=False, author_tag=False,
+                  analysis=2, publish=False, tlp=True, discover_tags=False, to_ids=False, author_tag=False,
                   bulk_tag=None, dedup_titles=False, stop_on_error=False):
     """
     Parse a Pulse or a list of Pulses and add it/them to MISP if server and key are present
