@@ -255,7 +255,7 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
 
     if misp:
         if not dedup_titles:
-            event = misp.new_event(distribution, threat_level, analysis, event_name, date=event_date, published=publish)
+            event = misp.new_event(distribution, threat_level, analysis, event_name, date=event_date, published=False)
         else:
             event = ''
             # Check if username is added to title
@@ -270,7 +270,7 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
             if 'message' in result:
                 if result['message'] == "No matches.":
                     event = misp.new_event(distribution, threat_level, analysis, event_name, date=event_date,
-                                           published=publish)
+                                           published=False)
             else:
                 for evt in result['response']:
                     # If it exists, set 'event' to the event
@@ -283,7 +283,7 @@ def create_events(pulse_or_list, author=False, server=False, key=False, misp=Fal
                     # Event not found, even though search results were returned
                     # Build new event
                     event = misp.new_event(distribution, threat_level, analysis, event_name, date=event_date,
-                                           published=publish)
+                                           published=False)
 
         time.sleep(0.2)
         if tlp:
