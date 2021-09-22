@@ -5,7 +5,7 @@ import logging
 
 from . import IndicatorTypes
 
-API_V1_ROOT = "{}/api/v1/"
+API_V1_ROOT = "{}/api/v1"
 PULSES_ROOT = "{}/pulses".format(API_V1_ROOT)
 SUBSCRIBED = "{}/subscribed".format(PULSES_ROOT)
 EVENTS = "{}/events".format(PULSES_ROOT)
